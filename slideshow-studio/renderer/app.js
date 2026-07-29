@@ -2,6 +2,8 @@ const folderInput = document.querySelector("#folderInput");
 const durationInput = document.querySelector("#durationInput");
 const bgColorInput = document.querySelector("#bgColorInput");
 const bgColorPicker = document.querySelector("#bgColorPicker");
+const greenScreenToggle = document.querySelector("#greenScreenToggle");
+const GREEN_SCREEN_COLOR = "#00ff00";
 const shadowToggle = document.querySelector("#shadowToggle");
 const shadowControls = document.querySelector("#shadowControls");
 const blurInput = document.querySelector("#blurInput");
@@ -22,6 +24,7 @@ const pickFolderButton = document.querySelector("#pickFolderButton");
 
 const state = {
   useShadow: true,
+  greenScreen: false,
   running: false
 };
 
@@ -35,6 +38,15 @@ function setShadowState(enabled) {
   shadowToggle.setAttribute("aria-pressed", String(enabled));
   shadowToggle.textContent = enabled ? "Enabled" : "Disabled";
   shadowControls.hidden = !enabled;
+  updatePreview();
+}
+
+function setGreenScreenState(enabled) {
+  state.greenScreen = enabled;
+  greenScreenToggle.classList.toggle("is-active", enabled);
+  greenScreenToggle.setAttribute("aria-pressed", String(enabled));
+  bgColorInput.disabled = enabled;
+  bgColorPicker.disabled = enabled;
   updatePreview();
 }
 
@@ -84,7 +96,7 @@ function updatePreview() {
   const distance = Number(distanceInput.value);
   const opacity = Number(opacityInput.value) / 100;
 
-  previewStage.style.background = bgColor;
+  previewStage.style.background = state.greenScreen ? GREEN_SCREEN_COLOR : bgColor;
   previewShadow.style.opacity = state.useShadow ? String(opacity) : "0";
   previewShadow.style.filter = `blur(${Math.max(1, blur * 2)}px)`;
   previewShadow.style.transform = `translate(${Math.round(distance * 2.4)}px, ${Math.round(distance * 2.9)}px)`;
@@ -94,7 +106,7 @@ function readPayload() {
   return {
     folder: folderInput.value.trim(),
     duration: Number(durationInput.value),
-    bgColor: bgColorInput.value.trim(),
+    bgColor: state.greenScreen ? GREEN_SCREEN_COLOR : bgColorInput.value.trim(),
     useShadow: state.useShadow,
     blurAmount: Number(blurInput.value),
     distanceAmount: Number(distanceInput.value),
@@ -126,6 +138,10 @@ pickFolderButton.addEventListener("click", async () => {
 
 shadowToggle.addEventListener("click", () => {
   setShadowState(!state.useShadow);
+});
+
+greenScreenToggle.addEventListener("click", () => {
+  setGreenScreenState(!state.greenScreen);
 });
 
 bgColorInput.addEventListener("input", () => syncColorInputs(bgColorInput));
